@@ -732,6 +732,7 @@ class InformeScreen(BaseScreen):
         self.add_widget(scroll)
 
     def _generar(self, *args):
+        
         fecha = self.fecha_input.text.strip()
         registro = get_registro_diario(fecha)
         if not registro:
@@ -783,6 +784,7 @@ class InformeSemanalScreen(BaseScreen):
         self.add_widget(scroll)
 
     def _generar(self, *args):
+        
         ini = self.ini_input.text.strip()
         fin = self.fin_input.text.strip()
         if ini > fin:
@@ -1109,6 +1111,7 @@ class AdminScreen(BaseScreen):
         grid.add_widget(self.mat_uni)
         tc.add_widget(grid)
         tc.add_widget(cat_button("AGREGAR MATERIAL", self._add_mat_cat, height=dp(40)))
+        tc.add_widget(cat_button("IMPORTAR DESDE EXCEL", self._import_mat_excel, height=dp(36)))
 
         for m in get_materiales_catalogo():
             lbl = colored_label(f"{m['nombre']} - {m['unidad']}", WHITE, size=12)
@@ -1145,6 +1148,101 @@ class AdminScreen(BaseScreen):
         confirm_popup("Eliminar", "Eliminar material del catalogo?",
                       lambda: [delete_material_catalogo(mid), self._switch_tab("materiales")])
 
+    def _import_mat_excel(self, *args):
+        content = BoxLayout(orientation="vertical", spacing=dp(10), padding=dp(10), size_hint_y=None)
+        content.bind(minimum_height=content.setter("height"))
+        content.add_widget(colored_label("Selecciona archivo Excel", YELLOW, size=14))
+        content.add_widget(colored_label("Columnas: Nombre, Unidad", WHITE, size=12))
+        filechooser = FileChooserListView(path=os.path.expanduser("~"), size_hint_y=None, height=dp(300),
+                                          filters=["*.xlsx", "*.xls"])
+        content.add_widget(filechooser)
+        btn_importar = cat_button("IMPORTAR", lambda x: self._do_import_mat(filechooser.path, filechooser.selection, popup))
+        content.add_widget(btn_importar)
+        popup = Popup(title="Importar materiales", content=content, size_hint=[0.95, 0.8])
+        popup.open()
+
+    def _do_import_mat(self, folder, selection, popup):
+        if not selection:
+            info_popup("Error", "Selecciona un archivo")
+            return
+        filepath = selection[0]
+        if not filepath.endswith((".xlsx", ".xls")):
+            info_popup("Error", "Debe ser archivo .xlsx")
+            return
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(filepath, read_only=True)
+            ws = wb.active
+            headers = [str(cell.value or "").strip().upper() for cell in next(ws.iter_rows(min_row=1, max_row=1))]
+            if "NOMBRE" not in headers or "UNIDAD" not in headers:
+                info_popup("Error", "El Excel debe tener columnas: Nombre, Unidad")
+                wb.close()
+                return
+            col_nom = headers.index("NOMBRE")
+            col_uni = headers.index("UNIDAD")
+            count = 0
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                nombre = str(row[col_nom] or "").strip()
+                unidad = str(row[col_uni] or "").strip()
+                if nombre and unidad:
+                    save_material_catalogo(nombre, unidad)
+                    count += 1
+            wb.close()
+            popup.dismiss()
+            info_popup("OK", f"{count} materiales importados")
+            self._switch_tab("materiales")
+        except Exception as e:
+            info_popup("Error", f"Error al importar: {e}")
+
+    def _import_par_excel(self, *args):
+        content = BoxLayout(orientation="vertical", spacing=dp(10), padding=dp(10), size_hint_y=None)
+        content.bind(minimum_height=content.setter("height"))
+        content.add_widget(colored_label("Selecciona archivo Excel", YELLOW, size=14))
+        content.add_widget(colored_label("Columnas: Codigo, Nombre, Descripcion, Unidad, Metrado", WHITE, size=12))
+        filechooser = FileChooserListView(path=os.path.expanduser("~"), size_hint_y=None, height=dp(300),
+                                          filters=["*.xlsx", "*.xls"])
+        content.add_widget(filechooser)
+        btn_importar = cat_button("IMPORTAR", lambda x: self._do_import_par(filechooser.path, filechooser.selection, popup))
+        content.add_widget(btn_importar)
+        popup = Popup(title="Importar partidas", content=content, size_hint=[0.95, 0.8])
+        popup.open()
+
+    def _do_import_par(self, folder, selection, popup):
+        if not selection:
+            info_popup("Error", "Selecciona un archivo")
+            return
+        filepath = selection[0]
+        if not filepath.endswith((".xlsx", ".xls")):
+            info_popup("Error", "Debe ser archivo .xlsx")
+            return
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(filepath, read_only=True)
+            ws = wb.active
+            headers = [str(cell.value or "").strip().upper() for cell in next(ws.iter_rows(min_row=1, max_row=1))]
+            if "NOMBRE" not in headers:
+                info_popup("Error", "El Excel debe tener columna: Nombre")
+                wb.close()
+                return
+            col_idx = {h: i for i, h in enumerate(headers)}
+            count = 0
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                nombre = str(row[col_idx["NOMBRE"]] or "").strip() if "NOMBRE" in col_idx and col_idx["NOMBRE"] < len(row) else ""
+                if not nombre:
+                    continue
+                cod = str(row[col_idx["CODIGO"]] or "").strip() if "CODIGO" in col_idx and col_idx["CODIGO"] < len(row) else ""
+                desc = str(row[col_idx["DESCRIPCION"]] or "").strip() if "DESCRIPCION" in col_idx and col_idx["DESCRIPCION"] < len(row) else ""
+                uni = str(row[col_idx["UNIDAD"]] or "").strip() if "UNIDAD" in col_idx and col_idx["UNIDAD"] < len(row) else ""
+                met = float(row[col_idx["METRADO"]]) if "METRADO" in col_idx and col_idx["METRADO"] < len(row) and row[col_idx["METRADO"]] is not None else 0.0
+                save_partida(cod, nombre, desc, None, uni, met)
+                count += 1
+            wb.close()
+            popup.dismiss()
+            info_popup("OK", f"{count} partidas importados")
+            self._switch_tab("partidas")
+        except Exception as e:
+            info_popup("Error", f"Error al importar: {e}")
+
     def _show_partidas(self):
         tc = self.tab_content
         tc.add_widget(section_title("PARTIDAS"))
@@ -1160,6 +1258,7 @@ class AdminScreen(BaseScreen):
             tc.add_widget(colored_label(lbl, WHITE, size=11))
             tc.add_widget(inp)
         tc.add_widget(cat_button("AGREGAR PARTIDA", self._add_partida, height=dp(40)))
+        tc.add_widget(cat_button("IMPORTAR DESDE EXCEL", self._import_par_excel, height=dp(36)))
 
         for p in get_partidas():
             txt = f"{p['codigo']+' - ' if p['codigo'] else ''}{p['nombre']}\n{p['descripcion'] or ''}\nUnidad: {p['unidad'] or 'N/A'} | Metrado: {p['metrado_total']}"
