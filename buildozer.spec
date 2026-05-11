@@ -5,15 +5,17 @@ package.name = controlobra
 package.domain = org.obra.control
 
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,gif,svg,xlsx,txt
+source.include_exts = py,png,jpg,jpeg,gif,svg,xlsx,txt,sqlite
 
-version = 1.1.0
-#version.regex = __version__ = ['"](.*)['"]
+version = 1.2.0
 version.filename = %(source.dir)s/main.py
 
-requirements = python3,kivy,plyer,python-docx,openpyxl,Pillow,pyjnius
+requirements = python3,plyer,python-docx,openpyxl,Pillow,pyjnius,lxml
 orientation = portrait
 fullscreen = 0
+
+osx.python_version = 3
+osx.kivy_version = 2.3.0
 
 android.api = 33
 android.minapi = 21
@@ -22,9 +24,10 @@ android.ndk = 25b
 android.accept_sdk_license = True
 android.archs = arm64-v8a
 
-android.permissions = CAMERA, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, INTERNET
+android.permissions = CAMERA, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, INTERNET, READ_MEDIA_IMAGES
 android.window_softinput_mode = adjustResize
-android.gradle_dependencies = androidx.core:core:1.9.0
+android.gradle_dependencies = androidx.core:core:1.10.1,androidx.activity:activity:1.7.2,androidx.appcompat:appcompat:1.6.1
+android.add_src =
 
 #presplash.filename = %(source.dir)s/presplash.png
 #icon.filename = %(source.dir)s/icon.png
@@ -32,7 +35,10 @@ presplash_color = #101010
 
 android.wakelock = False
 android.copy_libs = 1
-android.debug = False
+android.debug = True
 android.ndk_verbose = False
+android.rename_apk = no
+android.keyalias = 
+android.keystore = 
 
 ios.codesign.allowed = False
