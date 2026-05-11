@@ -21,7 +21,7 @@ android.minapi = 21
 android.sdk = 33
 android.ndk = 25b
 android.accept_sdk_license = True
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 android.permissions = CAMERA, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, INTERNET
 android.window_softinput_mode = adjustResize
