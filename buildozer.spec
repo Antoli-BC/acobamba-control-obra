@@ -10,7 +10,7 @@ source.include_exts = py,png,jpg,jpeg,gif,svg,xlsx,txt,sqlite
 version = 1.2.0
 version.filename = %(source.dir)s/main.py
 
-requirements = python3,plyer,python-docx,openpyxl,Pillow,pyjnius,lxml
+requirements = python3==3.11.5,kivy==2.3.0,plyer,python-docx,openpyxl,Pillow,pyjnius
 orientation = portrait
 fullscreen = 0
 
