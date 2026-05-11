@@ -11,8 +11,7 @@ version = 1.0.0
 #version.regex = __version__ = ['"](.*)['"]
 version.filename = %(source.dir)s/main.py
 
-requirements = python3,kivy,plyer,python-docx,openpyxl,Pillow,pyjnius
-
+requirements = python3,kivy,plyer,python-docx,openpyxl,Pillow,pyjnius 
 orientation = portrait
 fullscreen = 0
 
