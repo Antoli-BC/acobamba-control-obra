@@ -8,7 +8,7 @@ source.dir = .
 source.include_exts = py,png,jpg,jpeg,gif,svg,xlsx,txt
 
 version = 1.0.0
-version.regex = __version__ = ['"](.*)['"]
+#version.regex = __version__ = ['"](.*)['"]
 version.filename = %(source.dir)s/main.py
 
 requirements = python3,kivy,plyer,python-docx,openpyxl,Pillow,pyjnius
