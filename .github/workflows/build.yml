@@ -7,13 +7,13 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Python 3.11
-        uses: deadsnakes/action@v3.2.0
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -26,12 +26,14 @@ jobs:
             libncurses5-dev libncursesw5-dev libtinfo5 \
             cmake libffi-dev libssl-dev libltdl-dev
 
-      - name: Install Cython & Buildozer
+      - name: Pre-install buildozer dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install Cython==0.29.36 buildozer
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install Cython==0.29.36 buildozer appdirs colorama jinja2 sh meson ninja build toml packaging
 
       - name: Build APK
+        env:
+          PIP_USER: 0
         run: buildozer android debug
 
       - name: Upload APK
