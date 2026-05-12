@@ -13,6 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build APK
+        env:
+          BUILDOZER_ALLOW_ROOT: 1
         run: |
           rm -rf .buildozer
           buildozer android debug
