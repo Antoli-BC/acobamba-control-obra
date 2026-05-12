@@ -84,21 +84,6 @@ def section_title(text):
     return colored_label(f"[b]{text}[/b]", YELLOW, bold=True, size=15)
 
 
-def card_widget(content_widgets, border_color=YELLOW):
-    layout = BoxLayout(orientation="vertical", size_hint_y=None, padding=[dp(10), dp(8)], spacing=dp(4))
-    layout.bind(minimum_height=layout.setter("height"))
-    with layout.canvas.before:
-        Color(0.2, 0.2, 0.2, 1)
-        Rectangle(pos=layout.pos, size=layout.size)
-        Color(1, 0.804, 0, 1)
-        Rectangle(pos=layout.pos, size=[dp(4), layout.size[1]])
-    layout.bind(pos=lambda i, v: layout.canvas.before.get_group("bg")[0].pos
-                if layout.canvas.before.get_group("bg") else None)
-    for w in content_widgets:
-        layout.add_widget(w)
-    return layout
-
-
 def cat_button(text, on_press, height=dp(48), width=None):
     btn = Button(
         text=text,
